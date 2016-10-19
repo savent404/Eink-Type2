@@ -83,12 +83,12 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	
+	/*
 	extern const unsigned char G_Ultrachip1[];
 	extern const unsigned char G_Ultrachip_red1[];
 	extern const unsigned char G_Ultrachip2[];
 	extern const unsigned char G_Ultrachip_red2[];
-	
+	*/
 	FLASH_EraseInitTypeDef f = {
 		.TypeErase = FLASH_TYPEERASE_PAGES,
 		.Banks = FLASH_BANK_1,
@@ -112,16 +112,14 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
 	EPD_W21_Init();
-	/*lcd test */
-	EPD_W21_Display(G_Ultrachip1, G_Ultrachip_red1, 0);
-	while(1);
+
 	while (nRF24L01_Check() != _SET) {
 	}
   nRF24L01_Init();
   nRF24L01_TxInit((uint8_t*)addr);
   nRF24L01_RxInit(P0, (uint8_t*)addr);
   nRF24L01_Channel_Init(40);
-
+	while (1);
 	/* Erase flash zone
 		 Waiting for data comming
 	*/
@@ -271,13 +269,10 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOE, nBS_Pin|nRST_Pin|nDC_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(nRF24L01_CSN_GPIO_Port, nRF24L01_CSN_Pin, GPIO_PIN_SET);
-
-  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOD, nCS_Pin|SCLK_Pin|SDA_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(nRF24L01_CS_GPIO_Port, nRF24L01_CS_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOD, nRF24L01_CSN_Pin|nRF24L01_CE_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin : VPP_Pin */
   GPIO_InitStruct.Pin = VPP_Pin;
@@ -297,23 +292,19 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(nBUSY_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : nRF24L01_CSN_Pin */
-  GPIO_InitStruct.Pin = nRF24L01_CSN_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(nRF24L01_CSN_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : nCS_Pin SCLK_Pin SDA_Pin nRF24L01_CS_Pin */
-  GPIO_InitStruct.Pin = nCS_Pin|SCLK_Pin|SDA_Pin|nRF24L01_CS_Pin;
+  /*Configure GPIO pins : nCS_Pin SCLK_Pin SDA_Pin nRF24L01_CSN_Pin 
+                           nRF24L01_CE_Pin */
+  GPIO_InitStruct.Pin = nCS_Pin|SCLK_Pin|SDA_Pin|nRF24L01_CSN_Pin 
+                          |nRF24L01_CE_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : nRF24L01_IRN_Pin */
-  GPIO_InitStruct.Pin = nRF24L01_IRN_Pin;
+  /*Configure GPIO pin : nRF24L01_IRQ_Pin */
+  GPIO_InitStruct.Pin = nRF24L01_IRQ_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(nRF24L01_IRN_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(nRF24L01_IRQ_GPIO_Port, &GPIO_InitStruct);
 
 }
 
