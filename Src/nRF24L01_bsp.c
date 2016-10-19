@@ -28,7 +28,7 @@ void nRF24L01_CEN_opra(unsigned char set_1_reset_0){
 /* 发送使能操作 */
 void nRF24L01_CE_opra(unsigned char set_1_reset_0){
     if(set_1_reset_0)
-            HAL_GPIO_WritePin(NRF_CE_GPIO_Port, NRF_CE_Pin, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(NRF_CE_GPIO_Port, NRF_CE_Pin, GPIO_PIN_SET);
     else
         HAL_GPIO_WritePin(NRF_CE_GPIO_Port, NRF_CE_Pin, GPIO_PIN_RESET);
 }

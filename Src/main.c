@@ -61,20 +61,38 @@ static void MX_SPI2_Init(void);
 /* USER CODE BEGIN 0 */
 #define USR_FLASH_ADDR (uint32_t)(0x08010000)
 
-const uint8_t addr[5] = {0x34,0x43,0x10,0x10,0x01};
+const uint8_t addr[5] = {0x34,0x43,0x10,0x10,0x02};
 const uint8_t start_flag[] = "B";
 const uint8_t eof_flag[] = "EOF";
 
 uint32_t fpt = 0;
-uint8_t rec_buff[33] = "";
+uint8_t rec_buff[15000] = "";
 uint32_t flag = 0;
 nRF24L01_RxStructure rpt;
 
-void ram_2_flash(uint32_t des, uint32_t *src, uint32_t size_word) {
-	while (size_word--) {
-		HAL_FLASH_Program(des, (uint32_t)des, *src);
-		src++;
-		des += 4;
+void ram_2_flash(uint8_t * pt) {
+	uint32_t cnt = 15000;
+	uint32_t cnt_ = 0;
+	while (cnt--) {
+		HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (uint32_t)USR_FLASH_ADDR + cnt_, *(uint64_t*)pt);
+		cnt_ += 4;
+		pt += 4;
+	}
+}
+
+static uint8_t pic_check(uint8_t* pic, uint8_t offset) {
+	unsigned int cnt = 32;
+	while (cnt--) {
+		if (*pic++ != 0xFF)
+			goto CHECK;
+	}
+	return 0x00;
+	CHECK:
+	if (offset / 32 > 50) {
+		return 0x01;
+	}
+	else {
+		return 0x02;
 	}
 }
 /* USER CODE END 0 */
@@ -83,12 +101,10 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	/*
 	extern const unsigned char G_Ultrachip1[];
 	extern const unsigned char G_Ultrachip_red1[];
 	extern const unsigned char G_Ultrachip2[];
 	extern const unsigned char G_Ultrachip_red2[];
-	*/
 	FLASH_EraseInitTypeDef f = {
 		.TypeErase = FLASH_TYPEERASE_PAGES,
 		.Banks = FLASH_BANK_1,
@@ -119,12 +135,13 @@ int main(void)
   nRF24L01_TxInit((uint8_t*)addr);
   nRF24L01_RxInit(P0, (uint8_t*)addr);
   nRF24L01_Channel_Init(40);
-	while (1);
 	/* Erase flash zone
 		 Waiting for data comming
 	*/
+	/*
 	HAL_FLASH_Unlock();
 	HAL_FLASHEx_Erase(&f, &err);
+	*/
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -173,11 +190,21 @@ begin:
 				continue;
 			
 			/* copy to flash */
-			ram_2_flash(USR_FLASH_ADDR + fpt, (uint32_t*)rpt.pRec, 8);
 			fpt += 32;
+			if (!err)
+				err = pic_check(rpt.pRec, fpt);
+			if (!err)
+				rpt.pRec += 32;
+
 		}
 		/* display */
-		EPD_W21_Display((const unsigned char*)USR_FLASH_ADDR, (const unsigned char*)(USR_FLASH_ADDR + 15000), 0);
+		if (err == 1) {
+			EPD_W21_Display((const unsigned char*)G_Ultrachip1, (const unsigned char*)(G_Ultrachip_red1), 0);
+		}
+		else if (err == 2) {
+			EPD_W21_Display((const unsigned char*)G_Ultrachip2, (const unsigned char*)(G_Ultrachip_red2), 0);
+		}
+		/*EPD_W21_Display((const unsigned char*)G_Ultrachip2, (const unsigned char*)(G_Ultrachip_red2), 0);*/
   }
   /* USER CODE END 3 */
 
@@ -191,12 +218,12 @@ void SystemClock_Config(void)
   RCC_OscInitTypeDef RCC_OscInitStruct;
   RCC_ClkInitTypeDef RCC_ClkInitStruct;
 
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = 16;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL16;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -232,7 +259,7 @@ static void MX_SPI2_Init(void)
   hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi2.Init.NSS = SPI_NSS_SOFT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -303,7 +330,7 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin : nRF24L01_IRQ_Pin */
   GPIO_InitStruct.Pin = nRF24L01_IRQ_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(nRF24L01_IRQ_GPIO_Port, &GPIO_InitStruct);
 
 }
