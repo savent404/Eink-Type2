@@ -83,12 +83,12 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	/*
+	
 	extern const unsigned char G_Ultrachip1[];
 	extern const unsigned char G_Ultrachip_red1[];
 	extern const unsigned char G_Ultrachip2[];
 	extern const unsigned char G_Ultrachip_red2[];
-	*/
+	
 	FLASH_EraseInitTypeDef f = {
 		.TypeErase = FLASH_TYPEERASE_PAGES,
 		.Banks = FLASH_BANK_1,
@@ -112,7 +112,9 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
 	EPD_W21_Init();
-	
+	/*lcd test */
+	EPD_W21_Display(G_Ultrachip1, G_Ultrachip_red1, 0);
+	while(1);
 	while (nRF24L01_Check() != _SET) {
 	}
   nRF24L01_Init();
