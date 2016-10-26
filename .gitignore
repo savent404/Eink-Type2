@@ -1,4 +1,5 @@
-/MDK-ARM
 /Drivers
+!/MDK-ARM
+/MDK-ARM/*
 !/MDK-ARM/*.uvprojx
-!/MDK-ARM/*.s
+!/MDK-ARM/*.ini

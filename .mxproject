@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=E:/Project/MDK/电子墨水屏/Final1.4/DTA_red/Inc
+HeaderPath=E:/GitHub_Clone/Eink-Type2/Inc
 HeaderFiles=stm32f1xx_it.h;stm32f1xx_hal_conf.h;mxconstants.h;
-SourcePath=E:/Project/MDK/电子墨水屏/Final1.4/DTA_red/Src
+SourcePath=E:/GitHub_Clone/Eink-Type2/Src
 SourceFiles=stm32f1xx_it.h;stm32f1xx_hal_conf.h;mxconstants.h;stm32f1xx_it.c;stm32f1xx_hal_msp.c;stm32f1xx_hal_timebase_TIM.c;main.c;
 
 [PreviousLibFiles]
