@@ -32,15 +32,17 @@
   */
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f1xx_hal.h"
+#include "spi.h"
+#include "gpio.h"
 
 /* USER CODE BEGIN Includes */
-#include "EPD_W21.h"
-#include "string.h"
 #include "nRF24L01.h"
+#include "nRF24L01_register_L.h"
+#include "string.h"
+#include "EPD_W21.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
-SPI_HandleTypeDef hspi2;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
@@ -50,8 +52,6 @@ SPI_HandleTypeDef hspi2;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void Error_Handler(void);
-static void MX_GPIO_Init(void);
-static void MX_SPI2_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -59,59 +59,29 @@ static void MX_SPI2_Init(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-#define USR_FLASH_ADDR (uint32_t)(0x08010000)
-
 const uint8_t addr[5] = {0x34,0x43,0x10,0x10,0x02};
 const uint8_t start_flag[] = "B";
 const uint8_t eof_flag[] = "EOF";
 
 uint32_t fpt = 0;
-uint8_t rec_buff[15000] = "";
+uint8_t rec_buff[30000] = "";
 uint32_t flag = 0;
 nRF24L01_RxStructure rpt;
-
-void ram_2_flash(uint8_t * pt) {
+void convert(unsigned char *pt){
 	uint32_t cnt = 15000;
-	uint32_t cnt_ = 0;
 	while (cnt--) {
-		HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (uint32_t)USR_FLASH_ADDR + cnt_, *(uint64_t*)pt);
-		cnt_ += 4;
-		pt += 4;
+		*pt = ~*pt;
+		pt++;
 	}
 }
 
-static uint8_t pic_check(uint8_t* pic, uint8_t offset) {
-	unsigned int cnt = 32;
-	while (cnt--) {
-		if (*pic++ != 0xFF)
-			goto CHECK;
-	}
-	return 0x00;
-	CHECK:
-	if (offset / 32 > 50) {
-		return 0x01;
-	}
-	else {
-		return 0x02;
-	}
-}
 /* USER CODE END 0 */
 
 int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	extern const unsigned char G_Ultrachip1[];
-	extern const unsigned char G_Ultrachip_red1[];
-	extern const unsigned char G_Ultrachip2[];
-	extern const unsigned char G_Ultrachip_red2[];
-	FLASH_EraseInitTypeDef f = {
-		.TypeErase = FLASH_TYPEERASE_PAGES,
-		.Banks = FLASH_BANK_1,
-		.PageAddress = USR_FLASH_ADDR,
-		.NbPages = 30
-	};
-	uint32_t err = 0;
+  uint32_t err = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -124,24 +94,16 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_SPI2_Init();
+  MX_SPI1_Init();
 
   /* USER CODE BEGIN 2 */
-	EPD_W21_Init();
-
+  EPD_W21_Init();
 	while (nRF24L01_Check() != _SET) {
 	}
   nRF24L01_Init();
   nRF24L01_TxInit((uint8_t*)addr);
   nRF24L01_RxInit(P0, (uint8_t*)addr);
   nRF24L01_Channel_Init(40);
-	/* Erase flash zone
-		 Waiting for data comming
-	*/
-	/*
-	HAL_FLASH_Unlock();
-	HAL_FLASHEx_Erase(&f, &err);
-	*/
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -152,7 +114,7 @@ begin:
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-		rpt.pRec = rec_buff;
+    rpt.pRec = rec_buff;
 		fpt = 0;
 		flag = 0;
 		while (fpt <= 30000) {
@@ -192,19 +154,13 @@ begin:
 			/* copy to flash */
 			fpt += 32;
 			if (!err)
-				err = pic_check(rpt.pRec, fpt);
-			if (!err)
 				rpt.pRec += 32;
 
 		}
 		/* display */
-		if (err == 1) {
-			EPD_W21_Display((const unsigned char*)G_Ultrachip1, (const unsigned char*)(G_Ultrachip_red1), 0);
-		}
-		else if (err == 2) {
-			EPD_W21_Display((const unsigned char*)G_Ultrachip2, (const unsigned char*)(G_Ultrachip_red2), 0);
-		}
-		/*EPD_W21_Display((const unsigned char*)G_Ultrachip2, (const unsigned char*)(G_Ultrachip_red2), 0);*/
+		#define OFFSET 18
+		#define OOFSET -6
+		EPD_W21_Display((const unsigned char*)rec_buff + OFFSET, (const unsigned char*)rec_buff + OOFSET + 15000, 1);
   }
   /* USER CODE END 3 */
 
@@ -248,117 +204,9 @@ void SystemClock_Config(void)
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
-/* SPI2 init function */
-static void MX_SPI2_Init(void)
-{
-
-  hspi2.Instance = SPI2;
-  hspi2.Init.Mode = SPI_MODE_MASTER;
-  hspi2.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi2.Init.NSS = SPI_NSS_SOFT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
-  hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi2.Init.CRCPolynomial = 10;
-  if (HAL_SPI_Init(&hspi2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-}
-
-/** Configure pins as 
-        * Analog 
-        * Input 
-        * Output
-        * EVENT_OUT
-        * EXTI
-*/
-static void MX_GPIO_Init(void)
-{
-
-  GPIO_InitTypeDef GPIO_InitStruct;
-
-  /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOE_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(VPP_GPIO_Port, VPP_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOE, nBS_Pin|nRST_Pin|nDC_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, nCS_Pin|SCLK_Pin|SDA_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, nRF24L01_CSN_Pin|nRF24L01_CE_Pin, GPIO_PIN_SET);
-
-  /*Configure GPIO pin : VPP_Pin */
-  GPIO_InitStruct.Pin = VPP_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(VPP_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : nBS_Pin nRST_Pin nDC_Pin */
-  GPIO_InitStruct.Pin = nBS_Pin|nRST_Pin|nDC_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : nBUSY_Pin */
-  GPIO_InitStruct.Pin = nBUSY_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(nBUSY_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : nCS_Pin SCLK_Pin SDA_Pin nRF24L01_CSN_Pin 
-                           nRF24L01_CE_Pin */
-  GPIO_InitStruct.Pin = nCS_Pin|SCLK_Pin|SDA_Pin|nRF24L01_CSN_Pin 
-                          |nRF24L01_CE_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : nRF24L01_IRQ_Pin */
-  GPIO_InitStruct.Pin = nRF24L01_IRQ_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(nRF24L01_IRQ_GPIO_Port, &GPIO_InitStruct);
-
-}
-
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
-
-/**
-  * @brief  Period elapsed callback in non blocking mode
-  * @note   This function is called  when TIM1 interrupt took place, inside
-  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
-  * a global variable "uwTick" used as application time base.
-  * @param  htim : TIM handle
-  * @retval None
-  */
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-/* USER CODE BEGIN Callback 0 */
-
-/* USER CODE END Callback 0 */
-  if (htim->Instance == TIM1) {
-    HAL_IncTick();
-  }
-/* USER CODE BEGIN Callback 1 */
-
-/* USER CODE END Callback 1 */
-}
 
 /**
   * @brief  This function is executed in case of error occurrence.

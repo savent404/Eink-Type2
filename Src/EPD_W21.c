@@ -163,6 +163,9 @@ static void Load2Chip(const unsigned char *src) {
 
 void EPD_W21_Display(const unsigned char *src_black, const unsigned char *src_red, unsigned char SleepEnable)
 { 
+		extern void convert(unsigned char *);
+		convert((unsigned char *)src_black);
+		convert((unsigned char *)src_red);
 		EPD_W21_Init();
 
 		SPI4W_WRITECOM(0x01); 
