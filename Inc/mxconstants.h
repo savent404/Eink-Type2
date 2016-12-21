@@ -41,28 +41,28 @@
 
 /* Private define ------------------------------------------------------------*/
 
-#define VPP_Pin GPIO_PIN_4
-#define VPP_GPIO_Port GPIOA
-#define nBS_Pin GPIO_PIN_11
-#define nBS_GPIO_Port GPIOE
-#define nBUSY_Pin GPIO_PIN_13
-#define nBUSY_GPIO_Port GPIOE
-#define nRST_Pin GPIO_PIN_14
-#define nRST_GPIO_Port GPIOE
-#define nDC_Pin GPIO_PIN_15
-#define nDC_GPIO_Port GPIOE
-#define nCS_Pin GPIO_PIN_8
-#define nCS_GPIO_Port GPIOD
-#define SCLK_Pin GPIO_PIN_9
-#define SCLK_GPIO_Port GPIOD
-#define SDA_Pin GPIO_PIN_10
-#define SDA_GPIO_Port GPIOD
-#define nRF24L01_CSN_Pin GPIO_PIN_11
-#define nRF24L01_CSN_GPIO_Port GPIOD
-#define nRF24L01_IRQ_Pin GPIO_PIN_12
-#define nRF24L01_IRQ_GPIO_Port GPIOD
-#define nRF24L01_CE_Pin GPIO_PIN_13
-#define nRF24L01_CE_GPIO_Port GPIOD
+#define nRF24L01_IRQ_Pin GPIO_PIN_3
+#define nRF24L01_IRQ_GPIO_Port GPIOA
+#define nRF24L01_CSN_Pin GPIO_PIN_4
+#define nRF24L01_CSN_GPIO_Port GPIOC
+#define nRF24L01_CE_Pin GPIO_PIN_5
+#define nRF24L01_CE_GPIO_Port GPIOC
+#define LED_Pin GPIO_PIN_2
+#define LED_GPIO_Port GPIOB
+#define nBS_Pin GPIO_PIN_12
+#define nBS_GPIO_Port GPIOC
+#define nBUSY_Pin GPIO_PIN_2
+#define nBUSY_GPIO_Port GPIOD
+#define nRST_Pin GPIO_PIN_3
+#define nRST_GPIO_Port GPIOB
+#define nDC_Pin GPIO_PIN_4
+#define nDC_GPIO_Port GPIOB
+#define nCS_Pin GPIO_PIN_5
+#define nCS_GPIO_Port GPIOB
+#define SCLK_Pin GPIO_PIN_6
+#define SCLK_GPIO_Port GPIOB
+#define SDA_Pin GPIO_PIN_7
+#define SDA_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
