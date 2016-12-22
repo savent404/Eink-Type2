@@ -104,6 +104,7 @@ int main(void)
   nRF24L01_TxInit((uint8_t*)addr);
   nRF24L01_RxInit(P0, (uint8_t*)addr);
   nRF24L01_Channel_Init(40);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */

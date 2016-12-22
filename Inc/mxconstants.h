@@ -41,7 +41,7 @@
 
 /* Private define ------------------------------------------------------------*/
 
-#define nRF24L01_IRQ_Pin GPIO_PIN_3
+#define nRF24L01_IRQ_Pin GPIO_PIN_4
 #define nRF24L01_IRQ_GPIO_Port GPIOA
 #define nRF24L01_CSN_Pin GPIO_PIN_4
 #define nRF24L01_CSN_GPIO_Port GPIOC

@@ -64,7 +64,7 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin : PtPin */
-  GPIO_InitStruct.Pin = nRF24L01_IRQ_Pin;
+  GPIO_InitStruct.Pin = nRF24L01_IRQ_Pin | GPIO_PIN_3 | GPIO_PIN_4;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(nRF24L01_IRQ_GPIO_Port, &GPIO_InitStruct);
