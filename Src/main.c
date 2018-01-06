@@ -74,14 +74,13 @@ void convert(unsigned char *pt){
 		pt++;
 	}
 }
-
 /* USER CODE END 0 */
 
 int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-  uint32_t err = 0;
+  static uint32_t err = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -97,7 +96,9 @@ int main(void)
   MX_SPI1_Init();
 
   /* USER CODE BEGIN 2 */
+  
   EPD_W21_Init();
+
 	while (nRF24L01_Check() != _SET) {
 	}
   nRF24L01_Init();
