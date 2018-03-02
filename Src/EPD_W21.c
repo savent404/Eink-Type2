@@ -167,7 +167,7 @@ void EPD_W21_Display(const unsigned char *src_black, const unsigned char *src_re
 		convert((unsigned char *)src_black);
 		convert((unsigned char *)src_red);
 		EPD_W21_Init();
-
+#if 0
 		SPI4W_WRITECOM(0x01); 
 		SPI4W_WRITEDATA (0x03);    
 		SPI4W_WRITEDATA (0x00);
@@ -203,6 +203,29 @@ void EPD_W21_Display(const unsigned char *src_black, const unsigned char *src_re
 		Delay_ms(2);	              
 		SPI4W_WRITECOM(0X50);
 		SPI4W_WRITEDATA(0x77);
+#else
+		SPI4W_WRITECOM(0x06);         //boost��		SPI4W_WRITEDATA (0x17);
+		SPI4W_WRITEDATA (0x17);
+		SPI4W_WRITEDATA (0x17);       //07 0f 17 1f 27 2F 37 2f
+
+		SPI4W_WRITECOM(0x04);  
+		EPD_W21_CheckStatus();
+		SPI4W_WRITECOM(0x00);
+		SPI4W_WRITEDATA(0x0f);		// LUT from OTP 
+    
+    SPI4W_WRITECOM(0x30);
+		SPI4W_WRITEDATA (0x3a);
+		SPI4W_WRITECOM(0x61);
+		SPI4W_WRITEDATA (0x01); 
+		SPI4W_WRITEDATA (0x90);
+		SPI4W_WRITEDATA (0x01);
+		SPI4W_WRITEDATA (0x2c);
+		SPI4W_WRITECOM(0x82);
+		SPI4W_WRITEDATA (0x12);				   
+		Delay_ms(2);	              
+		SPI4W_WRITECOM(0X50);
+		SPI4W_WRITEDATA(0x77);
+#endif
 		/*pic_display();
 		*/
 		SPI4W_WRITECOM(0x10);	  	

@@ -63,6 +63,10 @@ const uint8_t addr[5] = {0x34,0x43,0x10,0x10,0x02};
 const uint8_t start_flag[] = "B";
 const uint8_t eof_flag[] = "EOF";
 
+extern unsigned char G_Ultrachip1[];
+extern unsigned char G_Ultrachip_red1[];
+extern unsigned char G_Ultrachip_red2[];
+extern unsigned char G_Ultrachip2[];
 uint32_t fpt = 0;
 uint8_t rec_buff[30000] = "";
 uint32_t flag = 0;
@@ -98,7 +102,14 @@ int main(void)
   /* USER CODE BEGIN 2 */
   
   EPD_W21_Init();
-
+  
+  // for test
+//  for (int i = 0; i < 15000; i++) {
+//    rec_buff[i] = ~G_Ultrachip1[i];
+//    rec_buff[i+15000] = ~G_Ultrachip_red1[i];
+//  }
+//  EPD_W21_Display(rec_buff, rec_buff+15000, 1);
+  
 	while (nRF24L01_Check() != _SET) {
 	}
   nRF24L01_Init();
