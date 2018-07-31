@@ -29,7 +29,7 @@
   * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   *
   ******************************************************************************
-  */
+  */	
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f1xx_hal.h"
 #include "spi.h"
@@ -172,7 +172,7 @@ begin:
 		}
 		/* display */
 		#define OFFSET 18
-		#define OOFSET -6
+		#define OOFSET 26
 		EPD_W21_Display((const unsigned char*)rec_buff + OFFSET, (const unsigned char*)rec_buff + OOFSET + 15000, 1);
   }
   /* USER CODE END 3 */
